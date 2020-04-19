@@ -8,7 +8,7 @@ export const getRandomNumbers = (lower_bound, upper_bound, amount = 3): Array<nu
     }
   }
   // console.log(unique_random_numbers.sort());
-  return unique_random_numbers.sort();
+  return unique_random_numbers.sort((a, b) => a - b);
 };
 
 export const getRandomNumber = (min, max) => {
