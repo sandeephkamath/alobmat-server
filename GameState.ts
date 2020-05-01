@@ -23,10 +23,21 @@ export class GameState extends Schema {
   @type("number")
   playersWon = 0;
 
+  started = false;
+
   generateChits() {
     for (let id in this.players) {
       this.players[id].generateChit();
     }
+  }
+
+  start() {
+    this.generateChits();
+    this.started = true;
+  }
+
+  hasStarted() {
+    return this.started;
   }
 
   addNewPlayer(playerId: string, name: string) {
@@ -48,21 +59,13 @@ export class GameState extends Schema {
     return new TurnEvent(nextPlayerId, nextPlayerName);
   }
 
-  scratchChit(num: number) {
+  onNumberPick(num: number) {
     for (let id in this.players) {
       const player = this.players[id];
       player.scratchChit(num);
-      this.copyPlayer(id, player);
+      this.players[id] = player.getClone();
     }
     this.pickedNumbers.push(num);
-  }
-
-  private copyPlayer(id: string, player: Player) {
-    const copyPlayer = new Player();
-    copyPlayer.name = player.name;
-    copyPlayer.chit = player.chit;
-    copyPlayer.winPosition = player.winPosition;
-    this.players[id] = copyPlayer;
   }
 
   getNextTurnEvent(currentId: string, pickedNumber: number) {
@@ -72,7 +75,7 @@ export class GameState extends Schema {
     while (indexFound === false) {
       lastIndex = (lastIndex + 1) % this.activePlayers.length;
       pId = this.activePlayers[lastIndex];
-      indexFound = !this.players[pId].hasWon();
+      indexFound = !this.players[pId].hasFinished();
     }
     this.currentPlayerIndex = lastIndex;
     this.currentPlayerId = this.activePlayers[lastIndex];
@@ -85,7 +88,7 @@ export class GameState extends Schema {
     const results: Array<PlayerResult> = [];
     for (let id in this.players) {
       const player = this.players[id];
-      if (player.hasWon()) {
+      if (player.hasFinished()) {
         results.push(player.getResult(id));
       } else if (player.didWin()) {
         player.winPosition = this.playersWon + 1;
@@ -111,6 +114,15 @@ export class GameState extends Schema {
       }
     }
     return null;
+  }
+
+  playerLeft(playerId: string) {
+    const leftPlayerIndex = this.activePlayers.indexOf(playerId);
+    this.activePlayers.splice(leftPlayerIndex, 1);
+    this.players[playerId].left = true;
+    if (!this.hasStarted()) {
+      this.players[playerId].leftBeforeStart = true;
+    }
   }
 
 }

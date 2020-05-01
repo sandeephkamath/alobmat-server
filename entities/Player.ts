@@ -12,6 +12,12 @@ export class Player extends Schema {
   @type("number")
   winPosition = -1;
 
+  @type("boolean")
+  left = false;
+
+  @type("boolean")
+  leftBeforeStart = false;
+
   public scratchChit(value) {
     this.chit.scratch(value);
   }
@@ -24,11 +30,20 @@ export class Player extends Schema {
     return this.chit.isAllScratched();
   }
 
-  public hasWon() {
-    return this.winPosition > -1;
+  public hasFinished() {
+    return this.winPosition > -1 || this.left;
   }
 
   public getResult(playerId: string): PlayerResult {
     return new PlayerResult(this.name, playerId, this.winPosition);
+  }
+
+  public getClone() {
+    const copyPlayer = new Player();
+    copyPlayer.name = this.name;
+    copyPlayer.chit = this.chit;
+    copyPlayer.winPosition = this.winPosition;
+    copyPlayer.left = this.left;
+    return copyPlayer;
   }
 }
