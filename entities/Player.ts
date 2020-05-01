@@ -1,5 +1,6 @@
 import {Schema, type} from "@colyseus/schema";
 import {Chit} from "./Chit";
+import {PlayerResult} from "./PlayerResult";
 
 export class Player extends Schema {
   @type("string")
@@ -11,15 +12,23 @@ export class Player extends Schema {
   @type("number")
   winPosition = -1;
 
-  public scratchChits(value) {
+  public scratchChit(value) {
     this.chit.scratch(value);
   }
 
-  public generateChits() {
+  public generateChit() {
     this.chit.generate();
   }
 
   public didWin() {
     return this.chit.isAllScratched();
+  }
+
+  public hasWon() {
+    return this.winPosition > -1;
+  }
+
+  public getResult(playerId: string): PlayerResult {
+    return new PlayerResult(this.name, playerId, this.winPosition);
   }
 }
