@@ -16,6 +16,7 @@ export class MyRoom extends Room<GameState> {
   onMessage(client: Client, message: any) {
     console.log(message);
     if (message.startGame) {
+      this.lock();
       this.state.generateChits();
       this.broadcast('start');
       const initialTurnEvent: TurnEvent = this.state.getInitialTurnEvent();
